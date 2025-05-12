@@ -13,20 +13,35 @@ import matplotlib
 matplotlib.use('TkAgg')  # oder 'Qt5Agg', wenn du Qt installiert hast
 import xarray as xr
 import rioxarray as rxa
+
+
 from indices import EOIndices 
 import matplotlib.image as mpimg
 
 '''--------------------------------------------------------------'''
 #Loading data again
-folder = "../data/treated/nc_files/" 
-S1_0418 = xr.load_dataset(folder + "subset_S1A_20230418.nc")
-S1_0629 = xr.load_dataset(folder + "subset_S1A_20230629.nc")
-S2_0420 = xr.load_dataset(folder + "subset_S2B_20230420.nc")
-S2_0624 = xr.load_dataset(folder + "subset1_S2A_20230624.nc")
-file_path ="../data/Land_Cover_Pendes.tif"
+folder = "../data/" 
+S1_0823 = xr.load_dataset(folder + "S1B_20210823.nc") 
+S1_0108 = xr.load_dataset(folder + "S1A_20220108.nc")
+S2_0826 = xr.load_dataset(folder + "S2B_20210826.nc")
+S2_0103 = xr.load_dataset(folder + "S2B_20220103.nc")
+file_path ="../data/Land_Cover_Palma1.tif"
 with rasterio.open(file_path) as src:
     land_cover_data = src.read(1)
+    
+landcover = rxa.open_rasterio(file_path, masked=True).squeeze()
+crs_lc = landcover.rio.crs
+# Beispiel mit rioxarray
+S1_0823= S1_0823.rio.write_crs(crs_lc, inplace=True)
+S1_0108 = S1_0108.rio.write_crs(crs_lc, inplace=True)
+S2_0826 = S2_0826.rio.write_crs(crs_lc, inplace=True)
+S2_0103 = S2_0103.rio.write_crs(crs_lc, inplace=True)
+S1_0823= S1_0823.rio.reproject_match(landcover)
+S1_0108 = S1_0108.rio.reproject_match(landcover)
+S2_0826 = S2_0826.rio.reproject_match(landcover)
+S2_0103 = S2_0103.rio.reproject_match(landcover)
 
+    
 # Single plot auxiliar function
 def plot_data(data, title="", colorbar=True, **kwargs):
     """
@@ -48,10 +63,11 @@ def plot_data(data, title="", colorbar=True, **kwargs):
 
 '''--------------------------------------------------------------'''
 
-# print(S1_0418['Amplitude_VH']) # 2146, 2548
-# print(S1_0629['Amplitude_VH'])
-# print(S2_0420.B2) # 1583, 2509
-# print(S2_0624.B2)
+# print(S1_0823['Amplitude_VH']) # 2146, 2548
+# print(S1_0108['Amplitude_VH'])
+# print(S2_0826.B2) # 1583, 2509
+# print(S2_0103.B2)
+# print(landcover)
 
 
 
@@ -59,101 +75,101 @@ def plot_data(data, title="", colorbar=True, **kwargs):
 
 '''--------------------------------------------------------------'''
 # Sentinel-1 Indices
-print(S1_0418.data_vars)
-print(S2_0420.data_vars)
-S1_0418_VH, S1_0418_VV = EOIndices.radar.extract_VV_VH(S1_0418)
-S1_0629_VH, S1_0629_VV = EOIndices.radar.extract_VV_VH(S1_0629)
+print(S1_0823.data_vars)
+print(S2_0826.data_vars)
+S1_0823_VH, S1_0823_VV = EOIndices.radar.extract_VV_VH(S1_0823)
+S1_0108_VH, S1_0108_VV = EOIndices.radar.extract_VV_VH(S1_0108)
 
 
 # Amplitude
-S1_0418_VH_A,_ = EOIndices.radar.compute_A(S1_0418_VH)
-S1_0418_VV_A,_ = EOIndices.radar.compute_A(S1_0418_VV)
-S1_0629_VH_A,_ = EOIndices.radar.compute_A(S1_0629_VH)
-S1_0629_VV_A,_ = EOIndices.radar.compute_A(S1_0629_VV)
+S1_0823_VH_A,_ = EOIndices.radar.compute_A(S1_0823_VH)
+S1_0823_VV_A,_ = EOIndices.radar.compute_A(S1_0823_VV)
+S1_0108_VH_A,_ = EOIndices.radar.compute_A(S1_0108_VH)
+S1_0108_VV_A,_ = EOIndices.radar.compute_A(S1_0108_VV)
 
 
 # VH / VV Ratio
-S1_0418_ratio = EOIndices.radar.compute_VH_VV_ratio(S1_0418_VH,S1_0418_VV)
-S1_0629_ratio = EOIndices.radar.compute_VH_VV_ratio(S1_0629_VH,S1_0629_VV)
+S1_0823_ratio = EOIndices.radar.compute_VH_VV_ratio(S1_0823_VH,S1_0823_VV)
+S1_0108_ratio = EOIndices.radar.compute_VH_VV_ratio(S1_0108_VH,S1_0108_VV)
 
 
 # Sigma Nought
-S1_0418_VH_sigma_nought = EOIndices.radar.compute_sigma_nought_log(S1_0418_VH)
-S1_0418_VV_sigma_nought = EOIndices.radar.compute_sigma_nought_log(S1_0418_VV)
-S1_0629_VH_sigma_nought = EOIndices.radar.compute_sigma_nought_log(S1_0629_VH)
-S1_0629_VV_sigma_nought = EOIndices.radar.compute_sigma_nought_log(S1_0629_VV)
+S1_0823_VH_sigma_nought = EOIndices.radar.compute_sigma_nought_log(S1_0823_VH)
+S1_0823_VV_sigma_nought = EOIndices.radar.compute_sigma_nought_log(S1_0823_VV)
+S1_0108_VH_sigma_nought = EOIndices.radar.compute_sigma_nought_log(S1_0108_VH)
+S1_0108_VV_sigma_nought = EOIndices.radar.compute_sigma_nought_log(S1_0108_VV)
 
 # RVI
-S1_0418_RVI = EOIndices.radar.compute_RVI(S1_0418_VH,S1_0418_VV)
-S1_0629_RVI = EOIndices.radar.compute_RVI(S1_0629_VH,S1_0629_VV)
+S1_0823_RVI = EOIndices.radar.compute_RVI(S1_0823_VH,S1_0823_VV)
+S1_0108_RVI = EOIndices.radar.compute_RVI(S1_0108_VH,S1_0108_VV)
 
 # RWI
-S1_0418_RWI = EOIndices.radar.compute_RWI(S1_0418_VH,S1_0418_VV)
-S1_0629_RWI = EOIndices.radar.compute_RWI(S1_0629_VH,S1_0629_VV)
+S1_0823_RWI = EOIndices.radar.compute_RWI(S1_0823_VH,S1_0823_VV)
+S1_0108_RWI = EOIndices.radar.compute_RWI(S1_0108_VH,S1_0108_VV)
 
 # MPDI
-S1_0418_MPDI = EOIndices.radar.compute_MPDI(S1_0418_VH,S1_0418_VV)
-S1_0629_MPDI = EOIndices.radar.compute_MPDI(S1_0629_VH,S1_0629_VV)
+S1_0823_MPDI = EOIndices.radar.compute_MPDI(S1_0823_VH,S1_0823_VV)
+S1_0108_MPDI = EOIndices.radar.compute_MPDI(S1_0108_VH,S1_0108_VV)
 
 
 """Now you must plot each indice and make sure they look correct."""
 
-# Plot each S1 indice, 0418
-plot_data(data=S1_0418_VH_A, title="S1_0418_VH_A")
-# plot_data(data=S1_0418_VV_A, title="S1_0418_VV_A")
-# plot_data(data=S1_0418_ratio, title="S1_0418_ratio")
-# plot_data(data=S1_0418_VH_sigma_nought, title="S1_0418_VH_sigma_nought")
-# plot_data(data=S1_0418_VV_sigma_nought, title="S1_0418_VV_sigma_nought")
-# plot_data(data=S1_0418_RVI, title="S1_0418_RVI")
-# plot_data(data=S1_0418_RWI, title="S1_0418_RWI")
-# plot_data(data=S1_0418_MPDI, title="S1_0418_MPDI")
+# # Plot each S1 indice, 0823
+# plot_data(data=S1_0823_VH_A, title="S1_0823_VH_A")
+# plot_data(data=S1_0823_VV_A, title="S1_0823_VV_A")
+# plot_data(data=S1_0823_ratio, title="S1_0823_ratio")
+# plot_data(data=S1_0823_VH_sigma_nought, title="S1_0823_VH_sigma_nought")
+# plot_data(data=S1_0823_VV_sigma_nought, title="S1_0823_VV_sigma_nought")
+# plot_data(data=S1_0823_RVI, title="S1_0823_RVI")
+# plot_data(data=S1_0823_RWI, title="S1_0823_RWI")
+# plot_data(data=S1_0823_MPDI, title="S1_0823_MPDI")
 
-# # Plot each S1 indice, 0629
-# plot_data(data=S1_0629_VH_A, title="S1_0629_VH_A")
-# plot_data(data=S1_0629_VV_A, title="S1_0629_VV_A")
-# plot_data(data=S1_0629_ratio, title="S1_0629_ratio")
-# plot_data(data=S1_0629_VH_sigma_nought, title="S1_0629_VH_sigma_nought")
-# plot_data(data=S1_0629_VV_sigma_nought, title="S1_0629_VV_sigma_nought")
-# plot_data(data=S1_0629_RVI, title="S1_0629_RVI")
-# plot_data(data=S1_0629_RWI, title="S1_0629_RWI")
-# plot_data(data=S1_0629_MPDI, title="S1_0629_MPDI")
+# # Plot each S1 indice, 0108
+# plot_data(data=S1_0108_VH_A, title="S1_0108_VH_A")
+# plot_data(data=S1_0108_VV_A, title="S1_0108_VV_A")
+# plot_data(data=S1_0108_ratio, title="S1_0108_ratio")
+# plot_data(data=S1_0108_VH_sigma_nought, title="S1_0108_VH_sigma_nought")
+# plot_data(data=S1_0108_VV_sigma_nought, title="S1_0108_VV_sigma_nought")
+# plot_data(data=S1_0108_RVI, title="S1_0108_RVI")
+# plot_data(data=S1_0108_RWI, title="S1_0108_RWI")
+# plot_data(data=S1_0108_MPDI, title="S1_0108_MPDI")
 
 
 # Sentinel 2 Indices
-S2_0420_NDVI = EOIndices.optical.NDVI(S2_0420)
-S2_0420_NDWI = EOIndices.optical.NDWI(S2_0420)
-S2_0420_AWEI = EOIndices.optical.AWEI(S2_0420)
-S2_0420_NDBI = EOIndices.optical.NDBI(S2_0420)
-S2_0420_NDSI_snow = EOIndices.optical.NDSI_snow_SWIR(S2_0420)
-S2_0420_NBR = EOIndices.optical.NBR(S2_0420)
-S2_0420_NDSI_snow_green = EOIndices.optical.NDSI_snow_green_SWIR(S2_0420)
+S2_0826_NDVI = EOIndices.optical.NDVI(S2_0826)
+S2_0826_NDWI = EOIndices.optical.NDWI(S2_0826)
+S2_0826_AWEI = EOIndices.optical.AWEI(S2_0826)
+S2_0826_NDBI = EOIndices.optical.NDBI(S2_0826)
+S2_0826_NDSI_snow = EOIndices.optical.NDSI_snow_SWIR(S2_0826)
+S2_0826_NBR = EOIndices.optical.NBR(S2_0826)
+S2_0826_NDSI_snow_green = EOIndices.optical.NDSI_snow_green_SWIR(S2_0826)
 
-S2_0624_NDVI = EOIndices.optical.NDVI(S2_0624)
-S2_0624_NDWI = EOIndices.optical.NDWI(S2_0624)
-S2_0624_AWEI = EOIndices.optical.AWEI(S2_0624)
-S2_0624_NDBI = EOIndices.optical.NDBI(S2_0624)
-S2_0624_NDSI_snow = EOIndices.optical.NDSI_snow_SWIR(S2_0624)
-S2_0624_NBR = EOIndices.optical.NBR(S2_0624)
-S2_0624_NDSI_snow_green = EOIndices.optical.NDSI_snow_green_SWIR(S2_0624)
-print(type(S2_0420_AWEI))
-
-# Plot the indices
-plot_data(data= S2_0420_NDVI, title="S2_0420_NDVI")
-plot_data(data= S2_0420_NDWI, title="S2_0420_NDWI")
-plot_data(data= S2_0420_AWEI, title="S2_0420_AWEI")
-plot_data(data= S2_0420_NDBI, title="S2_0420_NDBI")
-plot_data(data= S2_0420_NDSI_snow, title="S2_0420_NDSI_snow")
-plot_data(data= S2_0420_NBR, title="S2_0420_NBR")
-plot_data(data= S2_0420_NDSI_snow_green, title="S2_0420_NDSI_snow_green")
+S2_0103_NDVI = EOIndices.optical.NDVI(S2_0103)
+S2_0103_NDWI = EOIndices.optical.NDWI(S2_0103)
+S2_0103_AWEI = EOIndices.optical.AWEI(S2_0103)
+S2_0103_NDBI = EOIndices.optical.NDBI(S2_0103)
+S2_0103_NDSI_snow = EOIndices.optical.NDSI_snow_SWIR(S2_0103)
+S2_0103_NBR = EOIndices.optical.NBR(S2_0103)
+S2_0103_NDSI_snow_green = EOIndices.optical.NDSI_snow_green_SWIR(S2_0103)
+#print(type(S2_0826_AWEI))
 
 # # Plot the indices
-# plot_data(data= S2_0624_NDVI, title="S2_0624_NDVI")
-# plot_data(data= S2_0624_NDWI, title="S2_0624_NDWI")
-# plot_data(data= S2_0624_AWEI, title="S2_0624_AWEI")
-# plot_data(data= S2_0624_NDBI, title="S2_0624_NDBI")
-# plot_data(data= S2_0624_NDSI_snow, title="S2_0624_NDSI_snow")
-# plot_data(data= S2_0624_NBR, title="S2_0624_NBR")
-# plot_data(data= S2_0624_NDSI_snow_green, title="S2_0624_NDSI_snow_green")
+# plot_data(data= S2_0826_NDVI, title="S2_0826_NDVI")
+# plot_data(data= S2_0826_NDWI, title="S2_0826_NDWI")
+# plot_data(data= S2_0826_AWEI, title="S2_0826_AWEI")
+# plot_data(data= S2_0826_NDBI, title="S2_0826_NDBI")
+# plot_data(data= S2_0826_NDSI_snow, title="S2_0826_NDSI_snow")
+# plot_data(data= S2_0826_NBR, title="S2_0826_NBR")
+# plot_data(data= S2_0826_NDSI_snow_green, title="S2_0826_NDSI_snow_green")
+
+# # Plot the indices
+# plot_data(data= S2_0103_NDVI, title="S2_0103_NDVI")
+# plot_data(data= S2_0103_NDWI, title="S2_0103_NDWI")
+# plot_data(data= S2_0103_AWEI, title="S2_0103_AWEI")
+# plot_data(data= S2_0103_NDBI, title="S2_0103_NDBI")
+# plot_data(data= S2_0103_NDSI_snow, title="S2_0103_NDSI_snow")
+# plot_data(data= S2_0103_NBR, title="S2_0103_NBR")
+# plot_data(data= S2_0103_NDSI_snow_green, title="S2_0103_NDSI_snow_green")
 
 
 
@@ -167,72 +183,102 @@ Tip: You can use [`np.isfinite`](https://numpy.org/doc/stable/reference/generate
 since the invalid pixels are set to `nan`.
 """
 
-msk_S1_20230418 = np.isfinite(S1_0418.Amplitude_VH.data)
-msk_S1_20230629 = np.isfinite(S1_0629.Amplitude_VH.data)
-msk_S2_20230420 = np.isfinite(S2_0420.B2.data)
-msk_S2_20230624 = np.isfinite(S2_0624.B2.data)
+msk_S1_20210823 = np.isfinite(S1_0823.Amplitude_VH.data)
+msk_S1_20220108 = np.isfinite(S1_0108.Amplitude_VH.data)
+msk_S2_20210826 = np.isfinite(S2_0826.B2.data)
+msk_S2_20220103 = np.isfinite(S2_0103.B2.data)
+# print dimesnions of the masks
+print(msk_S1_20210823.shape)
+print(msk_S1_20220108.shape)
+print(msk_S2_20210826.shape)
+print(msk_S2_20220103.shape)
 
 # The total mask will be the logical and of both
-msk_total = msk_S1_20230418 & msk_S1_20230629 & msk_S2_20230420 & msk_S2_20230624
+msk_total = msk_S1_20210823 & msk_S1_20220108 & msk_S2_20210826 & msk_S2_20220103
+print(msk_total.shape)
 
 plt.figure(figsize=(10, 10))
 
 ax = plt.subplot(3, 2, 1)
-plt.imshow(msk_S1_20230418)
-ax.set_title('Mask for Sentinel-1 20230418 data')
+plt.imshow(msk_S1_20210823)
+ax.set_title('Mask for Sentinel-1 20210823 data')
 
 ax = plt.subplot(3, 2, 2)
-plt.imshow(msk_S1_20230629)
-ax.set_title('Mask for Sentinel-1 20230629 data')
+plt.imshow(msk_S1_20220108)
+ax.set_title('Mask for Sentinel-1 20220108 data')
 
 ax = plt.subplot(3, 2, 3)
-plt.imshow(msk_S2_20230420)
-ax.set_title('Mask for Sentinel-2 20230420 data')
+plt.imshow(msk_S2_20210826)
+ax.set_title('Mask for Sentinel-2 20210826 data')
 
 ax = plt.subplot(3, 2, 4)
-plt.imshow(msk_S2_20230624)
-ax.set_title('Mask for Sentinel-2 20230624 data')
+plt.imshow(msk_S2_20220103)
+ax.set_title('Mask for Sentinel-2 20220103 data')
 
 ax = plt.subplot(3, 2, (5, 6))
 plt.imshow(msk_total)
 ax.set_title('Combined mask for all four datasets')
 
 plt.tight_layout()
+plt.show()
 
 
-"""Here we generate an optical RGB image containing only the valid area of both datasets"""
-# Load previous rgb images
-rgb_s1_20230418 = mpimg.imread("/home/danielbugelnig/AAU/6.Semester/AI4EO/data/rgb/false_rgb_20230418.png")
-rgb_s1_20230629 = mpimg.imread("/home/danielbugelnig/AAU/6.Semester/AI4EO/data/rgb/false_rgb_20230629.png")
-rgb_s2_20230420 = mpimg.imread("/home/danielbugelnig/AAU/6.Semester/AI4EO/data/rgb/rgb_20230420.png")
-rgb_s2_20230624 = mpimg.imread("/home/danielbugelnig/AAU/6.Semester/AI4EO/data/rgb/rgb_20230624.png")
+"""Optical RGB image generation containing only the valid area of both datasets"""
+# Generate RGB s2 data
+rgb_20220103 = np.dstack((S2_0103.B4, S2_0103.B3, S2_0103.B2))
+rgb_20210826 = np.dstack((S2_0826.B4, S2_0826.B3, S2_0826.B2))
+
+for channel in range(3):
+    rgb_20220103[:,:,channel] = rgb_20220103[:,:,channel] / np.nanpercentile(rgb_20220103[:,:,channel], 98)
+for channel in range(3):
+    rgb_20210826[:,:,channel] = rgb_20210826[:,:,channel] / np.nanpercentile(rgb_20210826[:,:,channel], 98)
+rgb_20220103 = np.clip(rgb_20220103, 0, 1)
+rgb_20210826 = np.clip(rgb_20210826, 0, 1)
+
+# Save the RGB image as a PNG file
+plt.imsave("../data/rgb/rgb_20220103.png", rgb_20220103)
+plt.imsave("../data/rgb/rgb_20210826.png", rgb_20210826)
+
+plot_data(rgb_20220103)
+plot_data(rgb_20210826)
+
+#false rgb
+rgb_SAR_data_S1_20220108 = np.dstack((S1_0108.Amplitude_VV, S1_0108.Amplitude_VH, S1_0108.Amplitude_VV/S1_0108.Amplitude_VH))
+rgb_SAR_data_S1_20220108 = rgb_SAR_data_S1_20220108 / (2.5*np.nanmean(rgb_SAR_data_S1_20220108, axis=(0,1)))
+
+rgb_SAR_data_S1_20210823 = np.dstack((S1_0823.Amplitude_VV, S1_0823.Amplitude_VH, S1_0823.Amplitude_VV/S1_0823.Amplitude_VH))
+rgb_SAR_data_S1_20210823 = rgb_SAR_data_S1_20210823 / (2.5*np.nanmean(rgb_SAR_data_S1_20210823, axis=(0,1)))
+
+# Clip the values between 0 and 1
+rgb_SAR_data_S1_20220108 = np.clip(rgb_SAR_data_S1_20220108, 0, 1)
+rgb_SAR_data_S1_20210823 = np.clip(rgb_SAR_data_S1_20210823, 0, 1)
+
+# Save the RGB image as a PNG file
+plt.imsave("../data/rgb/false_rgb_20220108.png", rgb_SAR_data_S1_20220108)
+plt.imsave("../data/rgb/false_rgb_20210823.png", rgb_SAR_data_S1_20210823)
+
+
+plot_data(rgb_SAR_data_S1_20220108) 
+
+rgb_s1_20210823 = mpimg.imread("../data/rgb/false_rgb_20210823.png")
+rgb_s1_20220108 = mpimg.imread("../data/rgb/false_rgb_20220108.png")
+rgb_s2_20210826 = mpimg.imread("../data/rgb/rgb_20210826.png")
+rgb_s2_20220103 = mpimg.imread("../data/rgb/rgb_20220103.png")
 
 
 
-rgb_20230420_msk = rgb_s2_20230420.copy()
-rgb_20230420_msk[~msk_total,:] = np.nan    # all invalid pixel are NAN
+rgb_20210826_msk = rgb_s2_20210826.copy()
+rgb_20210826_msk[~msk_total,:] = np.nan    # all invalid pixel are NAN
 
-plot_data(rgb_20230420_msk, 'Optical image valid area on both datasets')
+plot_data(rgb_20210826_msk, 'Optical image valid area on both datasets')
 
-"""---
-
-## 4. Loading the Land Cover data.
-
-The last data to be loaded is the land cover. In this case we are working with a Tiff file. Therefore we will use rasterio to charge the data.
-"""
-
-file_path = "/home/danielbugelnig/AAU/6.Semester/AI4EO/data/Land_Cover_Pendes.tif"
-with rasterio.open(file_path) as src:
-  land_cover_data = src.read(1)
-
-"""Now, plot the Land Cover and analyse that it is correct."""
 
 # already plotted in data_preparation.py
 
 """One last check that we must do is to identify if the land cover has the same extension as the S1 and S2 data because we already preprocessed S1 and S2 but not the LC."""
 
-print(S1_0418)
-print(S2_0420)
+print(S1_0823)
+print(S2_0826)
 print(land_cover_data.shape) # right now it has the same with S2 but not with S1
 
 # Reproject Land Cover to match S1/S2
@@ -242,8 +288,8 @@ lc_geotiff = rxa.open_rasterio(file_path)
 
 # First we have to define the CRS in the rasterio format to use its
 # functionality
-ds = S2_0420    # Using here one S2 dataset but both S1 and S2 should have the same CRS
-wkt_string = ds.crs.attrs.get("wkt")
+ds = S2_0826    # Using here one S2 dataset but both S1 and S2 should have the same CRS
+wkt_string = ds.rio.crs.to_wkt()
 if wkt_string is None:
     raise ValueError("No WKT found in ds.crs attributes.")
 
@@ -258,14 +304,17 @@ landcover_aligned = lc_geotiff.rio.reproject_match(ds)
 land_cover_data = landcover_aligned.isel(band=0).values
 
 landcover_aligned.plot()
+print("Test")
+print(np.unique(land_cover_data))  # z. B. [255] oder [230 231 ...]
+
 
 # Now they should have the same shape
-print(S1_0418)
-print(S2_0420)
+print(S1_0823)
+print(S2_0826)
 print(land_cover_data.shape)
 
 # Plot of the aligned LC
-plot_data(landcover_aligned.isel(band=0).values, colorbar=True)
+plot_data(landcover_aligned.isel(band=0).values, title="alignedLC", colorbar=True)
 
 """## 4. Generating and saving the data stack
 
@@ -282,65 +331,65 @@ Notes:
 Careful! Each index and variable with data is in xarray format; only the values could be stack together.
 """
 
-Penedes_datastack = np.stack([10*np.log10(S1_0418.Amplitude_VV.values), 10*np.log10(S1_0629.Amplitude_VV.values),
-                              10*np.log10(S1_0418.Amplitude_VH.values), 10*np.log10(S1_0629.Amplitude_VH.values),
-                              S1_0418_ratio.values, S1_0629_ratio.values,
-                              S1_0418_VH_sigma_nought.values, S1_0629_VH_sigma_nought.values,
-                              S1_0418_VV_sigma_nought.values, S1_0629_VV_sigma_nought.values,
-                              S1_0418_RVI.values, S1_0629_RVI.values,
-                              S1_0418_RWI.values, S1_0629_RWI.values,
-                              S1_0418_MPDI.values, S1_0629_MPDI.values,
-                              S2_0420.B4, S2_0420.B3, S2_0420.B2,
-                              S2_0624.B4, S2_0624.B3, S2_0624.B2,
-                              S2_0420_NDVI.values, S2_0624_NDVI.values,
-                              S2_0420_NDWI.values, S2_0624_NDWI.values,
-                              S2_0420_AWEI.values, S2_0624_AWEI.values,
-                              S2_0420_NDBI.values, S2_0624_NDBI.values,
-                              S2_0420_NBR.values, S2_0624_NBR.values,
-                              S2_0420_NDSI_snow.values, S2_0624_NDSI_snow.values,
+Palma_datastack = np.stack([10*np.log10(S1_0823.Amplitude_VV.values), 10*np.log10(S1_0108.Amplitude_VV.values),
+                              10*np.log10(S1_0823.Amplitude_VH.values), 10*np.log10(S1_0108.Amplitude_VH.values),
+                              S1_0823_ratio.values, S1_0108_ratio.values,
+                              S1_0823_VH_sigma_nought.values, S1_0108_VH_sigma_nought.values,
+                              S1_0823_VV_sigma_nought.values, S1_0108_VV_sigma_nought.values,
+                              S1_0823_RVI.values, S1_0108_RVI.values,
+                              S1_0823_RWI.values, S1_0108_RWI.values,
+                              S1_0823_MPDI.values, S1_0108_MPDI.values,
+                              S2_0826.B4, S2_0826.B3, S2_0826.B2,
+                              S2_0103.B4, S2_0103.B3, S2_0103.B2,
+                              S2_0826_NDVI.values, S2_0103_NDVI.values,
+                              S2_0826_NDWI.values, S2_0103_NDWI.values,
+                              S2_0826_AWEI.values, S2_0103_AWEI.values,
+                              S2_0826_NDBI.values, S2_0103_NDBI.values,
+                              S2_0826_NBR.values, S2_0103_NBR.values,
+                              S2_0826_NDSI_snow.values, S2_0103_NDSI_snow.values,
                               land_cover_data,
-                              S1_0418.latitude.values, S1_0418.longitude.values], axis=0)
+                              S1_0823.latitude.values, S1_0823.longitude.values], axis=0)
 
-print(Penedes_datastack.shape)
+print(Palma_datastack.shape)
 
-bands_labels = ['Amplitude_VV_20230418', 'Amplitude_VV_20230629',
-                'Amplitude_VH_20230418', 'Amplitude_VH_20230629',
-                'VH_VV_rate_20230418', 'VH_VV_rate_20230629',
-                'Sigma_Nought_VH_20230418', 'Sigma_Nought_VH_20230629',
-                'Sigma_Nought_VV_20230418', 'Sigma_Nought_VV_20230629',
-                'RVI_20230418', 'RVI_20230629',
-                'RWI_20230418', 'RWI_20230629',
-                'MPDI_20230418', 'MPDI_20230629',
-                'S2_Red_20230420', 'S2_Green_20230420', 'S2_Blue_20230420', 'S2_Red_20230624', 'S2_Green_20230624', 'S2_Blue_20230624',
-                'NDVI_20230420', 'NDVI_20230624',
-                'NDWI_20230420', 'NDWI_20230624',
-                'AWEI_20230420', 'AWEI_20230624',
-                'NDBI_20230420', 'NDBI_20230624',
-                'NBR_20230420', 'NBR_20230624',
-                'NDSI_20230420', 'NDSI_20230624',
+bands_labels = ['Amplitude_VV_20210823', 'Amplitude_VV_20220108',
+                'Amplitude_VH_20210823', 'Amplitude_VH_20220108',
+                'VH_VV_rate_20210823', 'VH_VV_rate_20220108',
+                'Sigma_Nought_VH_20210823', 'Sigma_Nought_VH_20220108',
+                'Sigma_Nought_VV_20210823', 'Sigma_Nought_VV_20220108',
+                'RVI_20210823', 'RVI_20220108',
+                'RWI_20210823', 'RWI_20220108',
+                'MPDI_20210823', 'MPDI_20220108',
+                'S2_Red_20210826', 'S2_Green_20210826', 'S2_Blue_20210826', 'S2_Red_20220103', 'S2_Green_20220103', 'S2_Blue_20220103',
+                'NDVI_20210826', 'NDVI_20220103',
+                'NDWI_20210826', 'NDWI_20220103',
+                'AWEI_20210826', 'AWEI_20220103',
+                'NDBI_20210826', 'NDBI_20220103',
+                'NBR_20210826', 'NBR_20220103',
+                'NDSI_20210826', 'NDSI_20220103',
                 'Land_Cover',
                 'Latitude', 'Longitude']
 
 """Before exporting the data, in order to mask all the layers directly without the need to mask one by one, we will mask directly the whole stack."""
 
-Penedes_datastack_msk = Penedes_datastack.copy()
-Penedes_datastack_msk[:, ~msk_total] = np.nan
+Palma_datastack_msk = Palma_datastack.copy()
+Palma_datastack_msk[:, ~msk_total] = np.nan
 
-plot_data(Penedes_datastack_msk[0,:,:])
+plot_data(Palma_datastack_msk[0,:,:], title="Plotting the first band of the datastack", colorbar=True)
 
-filepath = folder + "Penedes_datastack_final.tif"
+filepath = folder + "Palma_datastack_final.tif"
 with rasterio.open(
     filepath,
     "w",
     driver="GTiff",
-    height=Penedes_datastack_msk.shape[1],
-    width=Penedes_datastack_msk.shape[2],
-    count=Penedes_datastack_msk.shape[0],
-    dtype=Penedes_datastack_msk.dtype,
+    height=Palma_datastack_msk.shape[1],
+    width=Palma_datastack_msk.shape[2],
+    count=Palma_datastack_msk.shape[0],
+    dtype=Palma_datastack_msk.dtype,
     crs="EPSG:4326"
 ) as dst:
-    for i in range(Penedes_datastack_msk.shape[0]):
-        dst.write(Penedes_datastack_msk[i], i + 1)
+    for i in range(Palma_datastack_msk.shape[0]):
+        dst.write(Palma_datastack_msk[i], i + 1)
 
     dst.descriptions = tuple(bands_labels)
 

@@ -15,7 +15,7 @@ matplotlib.use('TkAgg')
 import xarray as xr
 import rioxarray as rxa
 
-LOOKAT_S1 = False
+LOOKAT_S1 = True
 LOOKAT_S2 = True
 LOOKAT_TIF = True
 
@@ -65,18 +65,19 @@ In the provided file, however, all the bands have been upsampled to the same res
 
 To load the data we can use the load_dataset function from xarray.'''
 if LOOKAT_S2:
+    print("Loading Sentinel-2 data")
     # Load Sentinel-2 datase
     #S2 Data In NetCDF
-    folder = "../data/treated/nc_files/" 
-    data_S2_20230420 = xr.load_dataset(folder + "subset_S2B_20230420.nc")
-    data_S2_20230624 = xr.load_dataset(folder + "subset1_S2A_20230624.nc")
+    folder = "../data/" 
+    data_S2_20220103 = xr.load_dataset(folder + "subset_2_of_S2B_MSIL2A_20220103T120319_N0301_R023_T28RBS_20220103T143548_resampled_reprojected.nc")
+    data_S2_20210826 = xr.load_dataset(folder + "subset_3_of_S2B_MSIL2A_20210826T120319_N0500_R023_T28RBS_20230112T122418_resampled_reprojected.nc")
 
     # Inspecting the dataset
-    #print(data_S2_20230420)
+    print(data_S2_20210826)
 
-    # plt.figure()
-    # data_S2_20230420.B8.plot()
-    # plt.show()
+    plt.figure()
+    data_S2_20210826.B8.plot()
+    plt.show()
 
     '''
     Since Sentinel-2 has the Red, Green and Blue channels we can generate an RGB image by forming an image. 
@@ -85,10 +86,10 @@ if LOOKAT_S2:
     '''
 
     # Generate RGB, put the corresponding bands here
-    rgb_20230420 = np.dstack((data_S2_20230420.B4, data_S2_20230420.B3, data_S2_20230420.B2))
-    rgb_20230624 = np.dstack((data_S2_20230624.B4, data_S2_20230624.B3, data_S2_20230624.B2))
+    rgb_20220103 = np.dstack((data_S2_20220103.B4, data_S2_20220103.B3, data_S2_20220103.B2))
+    rgb_20210826 = np.dstack((data_S2_20210826.B4, data_S2_20210826.B3, data_S2_20210826.B2))
     # Clip the values between 0 and 1 --> could be outliers, data should be in that area
-    rgb_20230420 = np.clip(rgb_20230420, 0, 1)
+    rgb_20220103 = np.clip(rgb_20220103, 0, 1)
     
     
 
@@ -98,18 +99,18 @@ if LOOKAT_S2:
     Tip: you can use np.nanpercentile to avoid problems with invalid values, marked as nan.'''
 
     for channel in range(3):
-        rgb_20230420[:,:,channel] = rgb_20230420[:,:,channel] / np.nanpercentile(rgb_20230420[:,:,channel], 98)
+        rgb_20220103[:,:,channel] = rgb_20220103[:,:,channel] / np.nanpercentile(rgb_20220103[:,:,channel], 98)
     for channel in range(3):
-        rgb_20230624[:,:,channel] = rgb_20230624[:,:,channel] / np.nanpercentile(rgb_20230624[:,:,channel], 98)
-    rgb_20230420 = np.clip(rgb_20230420, 0, 1)
-    rgb_20230624 = np.clip(rgb_20230624, 0, 1)
+        rgb_20210826[:,:,channel] = rgb_20210826[:,:,channel] / np.nanpercentile(rgb_20210826[:,:,channel], 98)
+    rgb_20220103 = np.clip(rgb_20220103, 0, 1)
+    rgb_20210826 = np.clip(rgb_20210826, 0, 1)
     
     # Save the RGB image as a PNG file
-    plt.imsave("../data/rgb/rgb_20230420.png", rgb_20230420)
-    plt.imsave("../data/rgb/rgb_20230624.png", rgb_20230624)
+    plt.imsave("../data/rgb/rgb_20220103.png", rgb_20220103)
+    plt.imsave("../data/rgb/rgb_20210826.png", rgb_20210826)
 
-    #plot_data(rgb_20230420)
-    #plot_data(rgb_20230624)
+    plot_data(rgb_20220103)
+    plot_data(rgb_20210826)
     
 
 
@@ -124,25 +125,31 @@ The included bands contain the amplitude in VV and VH polarizations into the Amp
 Tip: To visualize this data is easier to show their values in dB (10*np.log10(Amplitude)) due to the large dynamic range of SAR data.
 '''
 if LOOKAT_S1:
+    print("Loading Sentinel-1 data")
 
-    folder = "../data/treated/nc_files/" 
-    data_S1_20230418 = xr.load_dataset(folder + "subset_S1A_20230418.nc")
-    data_S1_20230629 = xr.load_dataset(folder + "subset_S1A_20230629.nc")
+    folder = "../data/" 
+    data_S1_20220108 = xr.load_dataset(folder + "S1A_20220108.nc")
+    data_S1_20210823 = xr.load_dataset(folder + "S1B_20210823.nc")
 
     
     # Plot amplitudes in VV and VH in dB
-    # plot_data(10*np.log10(data_S1_20230418.Amplitude_VV), 'Amplitude VV (dB)', True)
-    # plot_data(10*np.log10(data_S1_20230418.Amplitude_VH), 'Amplitude VH (dB)', True)
+    plot_data(10*np.log10(data_S1_20220108.Amplitude_VV), 'Amplitude VV (dB)', True)
+    plot_data(10*np.log10(data_S1_20220108.Amplitude_VH), 'Amplitude VH (dB)', True)
     
     #We can also extract the latitude and longitude layer as we must store it on the stack later.
     # TODO - Extract the latitude and longitude data from one of the S1 acquisitions
-    #print(data_S1_20230418)
-    latitude_data = data_S1_20230418['latitude'].values
-    longitude_data = data_S1_20230418['longitude'].values
+    print(data_S1_20220108)
+    latitude_data = data_S1_20220108['latitude'].values
+    longitude_data = data_S1_20220108['longitude'].values
+    
+    print(data_S1_20210823)
+    latitude_data = data_S1_20210823['latitude'].values
+    longitude_data = data_S1_20210823['longitude'].values
+
 
     # does not work, only one dimensional?
-    #plot_data(latitude_data, 'Latitude', True)
-    #plot_data(longitude_data, 'Longitude', True)
+    # plot_data(latitude_data, 'Latitude', True)
+    # plot_data(longitude_data, 'Longitude', True)
     
     '''
     We can also generate a false-color RGB image from these SAR images by assigning the amplitude channels (VV, VH, VV / VH) 
@@ -151,22 +158,22 @@ if LOOKAT_S1:
     In this case, the RGB image will be normalized between 0 and 2.5 times the mean amplitude for each channel.
     '''
     
-    rgb_SAR_data_S1_20230418 = np.dstack((data_S1_20230418.Amplitude_VV, data_S1_20230418.Amplitude_VH, data_S1_20230418.Amplitude_VV/data_S1_20230418.Amplitude_VH))
-    rgb_SAR_data_S1_20230418 = rgb_SAR_data_S1_20230418 / (2.5*np.nanmean(rgb_SAR_data_S1_20230418, axis=(0,1)))
+    rgb_SAR_data_S1_20220108 = np.dstack((data_S1_20220108.Amplitude_VV, data_S1_20220108.Amplitude_VH, data_S1_20220108.Amplitude_VV/data_S1_20220108.Amplitude_VH))
+    rgb_SAR_data_S1_20220108 = rgb_SAR_data_S1_20220108 / (2.5*np.nanmean(rgb_SAR_data_S1_20220108, axis=(0,1)))
     
-    rgb_SAR_data_S1_20230629 = np.dstack((data_S1_20230629.Amplitude_VV, data_S1_20230629.Amplitude_VH, data_S1_20230629.Amplitude_VV/data_S1_20230629.Amplitude_VH))
-    rgb_SAR_data_S1_20230629 = rgb_SAR_data_S1_20230629 / (2.5*np.nanmean(rgb_SAR_data_S1_20230629, axis=(0,1)))
+    rgb_SAR_data_S1_20210823 = np.dstack((data_S1_20210823.Amplitude_VV, data_S1_20210823.Amplitude_VH, data_S1_20210823.Amplitude_VV/data_S1_20210823.Amplitude_VH))
+    rgb_SAR_data_S1_20210823 = rgb_SAR_data_S1_20210823 / (2.5*np.nanmean(rgb_SAR_data_S1_20210823, axis=(0,1)))
 
     # Clip the values between 0 and 1
-    rgb_SAR_data_S1_20230418 = np.clip(rgb_SAR_data_S1_20230418, 0, 1)
-    rgb_SAR_data_S1_20230629 = np.clip(rgb_SAR_data_S1_20230629, 0, 1)
+    rgb_SAR_data_S1_20220108 = np.clip(rgb_SAR_data_S1_20220108, 0, 1)
+    rgb_SAR_data_S1_20210823 = np.clip(rgb_SAR_data_S1_20210823, 0, 1)
 
     # Save the RGB image as a PNG file
-    plt.imsave("../data/rgb/false_rgb_20230418.png", rgb_SAR_data_S1_20230418)
-    plt.imsave("../data/rgb/false_rgb_20230629.png", rgb_SAR_data_S1_20230629)
+    plt.imsave("../data/rgb/false_rgb_20220108.png", rgb_SAR_data_S1_20220108)
+    plt.imsave("../data/rgb/false_rgb_20210823.png", rgb_SAR_data_S1_20210823)
 
 
-    plot_data(rgb_SAR_data_S1_20230418) 
+    plot_data(rgb_SAR_data_S1_20220108) 
     
     '''------------------------------------------------------------------------------------------'''
     '''
@@ -175,7 +182,7 @@ if LOOKAT_S1:
     Therefore we will use rasterio to charge the data.
     '''
 if LOOKAT_TIF:
-    file_path ="../data/Land_Cover_Pendes.tif"
+    file_path ="../data/Land_Cover_Palma1.tif"
     with rasterio.open(file_path) as src:
         land_cover_data = src.read(1)
         #plot_data(land_cover_data)
