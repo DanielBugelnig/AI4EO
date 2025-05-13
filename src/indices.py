@@ -7,7 +7,7 @@ Purpose : Class for computing various indices from radar and optical data.
 
 import numpy as np
 import matplotlib
-matplotlib.use('TkAgg')  # oder 'Qt5Agg', wenn du Qt installiert hast
+matplotlib.use('TkAgg')  
 import xarray as xr
 from xarray.core.dataarray import DataArray
 from xarray.core.dataset import Dataset

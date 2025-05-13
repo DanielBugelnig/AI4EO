@@ -335,7 +335,7 @@ Palma_datastack = np.stack([10*np.log10(S1_0823.Amplitude_VV.values), 10*np.log1
                               10*np.log10(S1_0823.Amplitude_VH.values), 10*np.log10(S1_0108.Amplitude_VH.values),
                               S1_0823_ratio.values, S1_0108_ratio.values,
                               S1_0823_VH_sigma_nought.values, S1_0108_VH_sigma_nought.values,
-                              S1_0823_VV_sigma_nought.values, S1_0108_VV_sigma_nought.values,
+                            #   S1_0823_VV_sigma_nought.values, S1_0108_VV_sigma_nought.values,
                               S1_0823_RVI.values, S1_0108_RVI.values,
                               S1_0823_RWI.values, S1_0108_RWI.values,
                               S1_0823_MPDI.values, S1_0108_MPDI.values,
@@ -356,7 +356,7 @@ bands_labels = ['Amplitude_VV_20210823', 'Amplitude_VV_20220108',
                 'Amplitude_VH_20210823', 'Amplitude_VH_20220108',
                 'VH_VV_rate_20210823', 'VH_VV_rate_20220108',
                 'Sigma_Nought_VH_20210823', 'Sigma_Nought_VH_20220108',
-                'Sigma_Nought_VV_20210823', 'Sigma_Nought_VV_20220108',
+                # 'Sigma_Nought_VV_20210823', 'Sigma_Nought_VV_20220108',
                 'RVI_20210823', 'RVI_20220108',
                 'RWI_20210823', 'RWI_20220108',
                 'MPDI_20210823', 'MPDI_20220108',
@@ -377,7 +377,7 @@ Palma_datastack_msk[:, ~msk_total] = np.nan
 
 plot_data(Palma_datastack_msk[0,:,:], title="Plotting the first band of the datastack", colorbar=True)
 
-filepath = folder + "Palma_datastack_final.tif"
+filepath = folder + "Palma_datastack.tif"
 with rasterio.open(
     filepath,
     "w",

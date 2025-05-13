@@ -47,7 +47,6 @@ As per the project requirements, this repository includes:
 - ✅ **Codebase** – Scripts and a main Colab notebook for end-to-end processing and analysis
 - ✅ **Report** – A concise summary of our methodology, results, and conclusions (`doc/report.pdf`)
 
-All three components are packaged in a single `.zip` archive for submission via **Atenea**.
 
 ## Project Timeline
 
@@ -67,8 +66,9 @@ Our dataset satisfies these requirements and includes additional bands and metad
 ## Usage
 
 1. Clone the repository
-2. Open `AI4EO_Project.ipynb` in [Google Colab](https://colab.research.google.com/)
-3. Follow the cells step by step to:
+2. Create a virtual environment (python3.10) install all requirements (requirements.txt)
+3. Open `AI4EO_Project.ipynb` in [Google Colab](https://colab.research.google.com/)
+4. Follow the cells step by step to:
    - Load and visualize data
    - Compute indices
    - Run classification and change detection
