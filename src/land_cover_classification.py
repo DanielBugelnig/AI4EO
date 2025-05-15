@@ -36,6 +36,7 @@ import matplotlib.pyplot as plt
 
 from utility import plot_landcover, plot_data, class_mapping
 from convolutionalNN import LandCoverDataset, SimpleCNN  ,visualize_patch_split, predict_full_image
+from unet import UNet
 
 torch.manual_seed(13)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -74,21 +75,31 @@ rgb = np.clip(rgb, 0, 1)
 plot_data(rgb)
 
 # Area to train
-dataset_data_subarea = dataset_data[:, 100:400, 300:880]
-plot_data(rgb[100:400, 300:880])
+
+dataset_data_subarea = dataset_data[:, 000:600, 000:1080]
+plot_data(rgb[000:500, 000:880])
 
 
 # Band Selection for training
 
-training_bands = ['Amplitude_VV_20210823',
-                  'Amplitude_VH_20210823',
-                  'RVI_20210823',
-                  'MPDI_20210823',
-                  'S2_Red_20220108',
-                  'S2_Green_20220108',
-                  'S2_Blue_20220108',
-                  'NDVI_20220108',
-                  'Land_Cover']
+training_bands = [     'Amplitude_VV_20210823',
+     'Amplitude_VH_20210823',
+    'VH_VV_rate_20210823',
+    'Sigma_Nought_VH_20210823',
+    'RVI_20210823',
+    'RWI_20210823',
+    'MPDI_20210823',
+    'S2_Red_20210826',
+    'S2_Green_20210826',
+    'S2_Blue_20210826',
+    'NDVI_20210826',
+    'NDWI_20210826',
+    'AWEI_20210826',
+    'AWEI_20220x103',
+    'NDBI_20210826',
+    'NBR_20210826',
+    'NDSI_20210826',
+    'Land_Cover']
 
 training_bands_idx = []
 for band_training in training_bands:
@@ -103,6 +114,12 @@ plt.hist(stack_full[-1].ravel(), [10,20,30,40,50,60,70,80,90])
 plt.show()
 print(np.mean(stack_full, axis=(1,2)))
 print(np.std(stack_full, axis=(1,2)))
+
+label_array = stack_full[-1].ravel()
+
+classes, counts = np.unique(label_array, return_counts=True)
+print("Klassen:", classes)
+print("Anzahlen:", counts)
 
 #for normalization
 mean = np.nanmean(stack_full[:-1], axis=(1, 2))  # exclude label layer
@@ -138,12 +155,22 @@ print(index_to_classname)
 
 input_stack = standardized_stack[0:-1,...]
 output_stack = indexed_label_band
-dataset = LandCoverDataset(input_stack, output_stack.astype(np.float32), patch_size=32)
+dataset = LandCoverDataset(input_stack, output_stack.astype(np.float32), patch_size=16)
 print(input_stack.shape)
 print(output_stack.shape)
 
 print(f"Input stack shape: {input_stack.shape}")
 print(f"Output stack (classes stack) shape: {output_stack.shape}")
+
+# Häufigkeiten normieren
+frequencies = counts / np.sum(counts)
+
+# Gewichtung berechnen (log stabilisiert)
+weights = 1.0 / (np.log(1.02 + frequencies))
+weights = weights / weights.sum()  # optional: Normierung auf Summe = 1
+weights_tensor = torch.tensor(weights, dtype=torch.float32).to('cuda')
+
+print("Gewichte:", weights_tensor)
 
 # Check dataset length (number of patches of patch_size * patch_size)
 len(dataset)
@@ -171,13 +198,15 @@ train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16, shuffle=True)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=16, shuffle = False)
 
-visualize_patch_split(stack_full, train_dataset, test_dataset, patch_size=32)
+visualize_patch_split(stack_full, train_dataset, test_dataset, patch_size=16)
 model = SimpleCNN(in_channels=input_stack.shape[0], num_classes=len(unique_classes)).to(device)  # Set num_classes appropriately
+print(len(unique_classes))
+#model = UNet(input_stack.shape[0],len(unique_classes)).to(device)
 print(model)
 
 
-criterion = nn.CrossEntropyLoss()              # For multi-class classification
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+criterion = torch.nn.CrossEntropyLoss(weight=weights_tensor)
+optimizer = optim.Adam(model.parameters(), lr=0.002)
 
 # Training loop
 num_epochs = 201
