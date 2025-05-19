@@ -11,3 +11,6 @@ This file keeps track of the progress made through the project
 
 ## 13.05.2025
 **Daniel**: transfered the World Cover Classification and trained first models
+
+## 19.05.2025
+**Daniel**: added the datastack for change detection, added a src file documentation

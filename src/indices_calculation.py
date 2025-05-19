@@ -29,6 +29,15 @@ file_path ="../data/Land_Cover_Palma1.tif"
 with rasterio.open(file_path) as src:
     land_cover_data = src.read(1)
     
+change_band = xr.load_dataset("../data/LaPalma_mod.nc")
+
+print(S1_0823.data_vars)
+print(change_band.data_vars)
+print(change_band['Lava_Extent'])
+print(S2_0103['B2'])
+input()
+
+    
 landcover = rxa.open_rasterio(file_path, masked=True).squeeze()
 crs_lc = landcover.rio.crs
 # Beispiel mit rioxarray
@@ -40,6 +49,8 @@ S1_0823= S1_0823.rio.reproject_match(landcover)
 S1_0108 = S1_0108.rio.reproject_match(landcover)
 S2_0826 = S2_0826.rio.reproject_match(landcover)
 S2_0103 = S2_0103.rio.reproject_match(landcover)
+change_band = change_band.rio.write_crs(crs_lc, inplace=True)
+change_band = change_band.rio.reproject_match(landcover)
 
     
 # Single plot auxiliar function
@@ -239,8 +250,8 @@ rgb_20210826 = np.clip(rgb_20210826, 0, 1)
 plt.imsave("../data/rgb/rgb_20220103.png", rgb_20220103)
 plt.imsave("../data/rgb/rgb_20210826.png", rgb_20210826)
 
-plot_data(rgb_20220103)
-plot_data(rgb_20210826)
+#plot_data(rgb_20220103)
+#plot_data(rgb_20210826)
 
 #false rgb
 rgb_SAR_data_S1_20220108 = np.dstack((S1_0108.Amplitude_VV, S1_0108.Amplitude_VH, S1_0108.Amplitude_VV/S1_0108.Amplitude_VH))
@@ -258,7 +269,7 @@ plt.imsave("../data/rgb/false_rgb_20220108.png", rgb_SAR_data_S1_20220108)
 plt.imsave("../data/rgb/false_rgb_20210823.png", rgb_SAR_data_S1_20210823)
 
 
-plot_data(rgb_SAR_data_S1_20220108) 
+#plot_data(rgb_SAR_data_S1_20220108) 
 
 rgb_s1_20210823 = mpimg.imread("../data/rgb/false_rgb_20210823.png")
 rgb_s1_20220108 = mpimg.imread("../data/rgb/false_rgb_20220108.png")
@@ -270,7 +281,7 @@ rgb_s2_20220103 = mpimg.imread("../data/rgb/rgb_20220103.png")
 rgb_20210826_msk = rgb_s2_20210826.copy()
 rgb_20210826_msk[~msk_total,:] = np.nan    # all invalid pixel are NAN
 
-plot_data(rgb_20210826_msk, 'Optical image valid area on both datasets')
+#plot_data(rgb_20210826_msk, 'Optical image valid area on both datasets')
 
 
 # already plotted in data_preparation.py
@@ -330,7 +341,11 @@ Notes:
 
 Careful! Each index and variable with data is in xarray format; only the values could be stack together.
 """
-
+# check the shape
+print("Test")
+print(change_band['Lava_Extent'].shape)
+print("shape of the S1 data")
+print(S1_0823.Amplitude_VV.shape)
 Palma_datastack = np.stack([10*np.log10(S1_0823.Amplitude_VV.values), 10*np.log10(S1_0108.Amplitude_VV.values),
                               10*np.log10(S1_0823.Amplitude_VH.values), 10*np.log10(S1_0108.Amplitude_VH.values),
                               S1_0823_ratio.values, S1_0108_ratio.values,
@@ -348,6 +363,7 @@ Palma_datastack = np.stack([10*np.log10(S1_0823.Amplitude_VV.values), 10*np.log1
                               S2_0826_NBR.values, S2_0103_NBR.values,
                               S2_0826_NDSI_snow.values, S2_0103_NDSI_snow.values,
                               land_cover_data,
+                              change_band['Lava_Extent'].values,
                               S1_0823.latitude.values, S1_0823.longitude.values], axis=0)
 
 print(Palma_datastack.shape)
@@ -367,7 +383,7 @@ bands_labels = ['Amplitude_VV_20210823', 'Amplitude_VV_20220108',
                 'NDBI_20210826', 'NDBI_20220103',
                 'NBR_20210826', 'NBR_20220103',
                 'NDSI_20210826', 'NDSI_20220103',
-                'Land_Cover',
+                'Land_Cover', 'Change_Band',
                 'Latitude', 'Longitude']
 
 """Before exporting the data, in order to mask all the layers directly without the need to mask one by one, we will mask directly the whole stack."""
@@ -377,7 +393,8 @@ Palma_datastack_msk[:, ~msk_total] = np.nan
 
 plot_data(Palma_datastack_msk[0,:,:], title="Plotting the first band of the datastack", colorbar=True)
 
-filepath = folder + "Palma_datastack.tif"
+filepath = folder + "Palma_datastack_change_detection.tif"
+print(f"Saved to {filepath}")
 with rasterio.open(
     filepath,
     "w",

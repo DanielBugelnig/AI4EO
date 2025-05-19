@@ -12,6 +12,11 @@ import matplotlib.pyplot as plt
 
 from torch.utils.data import Dataset
 
+def init_weights(module):
+    if isinstance(module, nn.Conv2d) or isinstance(module, nn.ConvTranspose2d):
+        #Apply He for ReLU
+        nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
+
 class LandCoverDataset(Dataset):
     def __init__(self, input_stack, output_array, patch_size=32, transform=None):
         """
@@ -63,18 +68,18 @@ class LandCoverDataset(Dataset):
 class SimpleCNN(nn.Module):
     def __init__(self, in_channels, num_classes):
         super(SimpleCNN, self).__init__()
+        
         self.encoder = nn.Sequential(
             nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.Conv2d(32, 64, kernel_size=3, padding=1),
-            nn.Conv2d(64, 128, kernel_size=3, padding=1),
-            nn.Conv2d(128, 64, kernel_size=3, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
         )
         self.classifier = nn.Conv2d(64, num_classes, kernel_size=1)  # 1x1 conv for pixel-wise classification
-
+        self.apply(init_weights)
+        
     def forward(self, x):
         x = self.encoder(x)
         x = self.classifier(x)  # Output shape: (B, num_classes, H, W)

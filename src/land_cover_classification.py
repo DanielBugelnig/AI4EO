@@ -35,7 +35,7 @@ from sklearn.metrics import classification_report, confusion_matrix, ConfusionMa
 import matplotlib.pyplot as plt
 
 from utility import plot_landcover, plot_data, class_mapping
-from convolutionalNN import LandCoverDataset, SimpleCNN  ,visualize_patch_split, predict_full_image
+from convolutionalNN import LandCoverDataset, SimpleCNN  ,visualize_patch_split, predict_full_image, init_weights
 
 torch.manual_seed(13)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -49,6 +49,8 @@ fullpath = dataset_name
 with rasterio.open(fullpath) as dataset:
     dataset_data = dataset.read()
     bands = dataset.descriptions
+    
+
 
 print(f"Image Dimensions: {dataset_data.shape}")
 print(f"Bands: {bands}")
@@ -74,21 +76,33 @@ rgb = np.clip(rgb, 0, 1)
 plot_data(rgb)
 
 # Area to train
-dataset_data_subarea = dataset_data[:, 100:400, 300:880]
-plot_data(rgb[100:400, 300:880])
+dataset_data_subarea = dataset_data[:, 0:500, 000:680]
+plot_data(rgb[0:500, 000:680])
 
 
 # Band Selection for training
 
-training_bands = ['Amplitude_VV_20210823',
-                  'Amplitude_VH_20210823',
-                  'RVI_20210823',
-                  'MPDI_20210823',
-                  'S2_Red_20220108',
-                  'S2_Green_20220108',
-                  'S2_Blue_20220108',
-                  'NDVI_20220108',
-                  'Land_Cover']
+training_bands = [
+     'Amplitude_VV_20210823',
+     'Amplitude_VH_20210823',
+    # 'VH_VV_rate_20210823',
+    # 'Sigma_Nought_VH_20210823',
+    # 'RVI_20210823',
+    # 'RWI_20210823',
+    # 'MPDI_20210823',
+    'S2_Red_20210826',
+    'S2_Green_20210826',
+    'S2_Blue_20210826',
+    # 'NDVI_20210826',
+    # 'NDWI_20210826',
+    # 'AWEI_20210826',
+    # 'AWEI_20220x103',
+    # 'NDBI_20210826',
+    # 'NBR_20210826',
+    # 'NDSI_20210826',
+    'Land_Cover'
+]
+
 
 training_bands_idx = []
 for band_training in training_bands:
@@ -168,10 +182,10 @@ train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 # Create DataLoaders
 # Note the parameter shuffle=True for the Training dataloader --> Each epoch the
 #   training patches will be loaded in a different order
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16, shuffle=True)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=16, shuffle = False)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=4, shuffle = False)
 
-visualize_patch_split(stack_full, train_dataset, test_dataset, patch_size=32)
+visualize_patch_split(stack_full, train_dataset, test_dataset, patch_size=64)
 model = SimpleCNN(in_channels=input_stack.shape[0], num_classes=len(unique_classes)).to(device)  # Set num_classes appropriately
 print(model)
 
@@ -233,7 +247,7 @@ for epoch in range(num_epochs):
       print(f"Epoch {epoch+1}/{num_epochs} - Train Loss: {train_losses[-1]:.4f} - Test Pixel Accuracy: {accuracy:.4f}")
 
 # Optional: Save the trained model
-torch.save(model.state_dict(), "../models/land_cover_cnn.pth")
+torch.save(model.state_dict(), "../models/land_cover_cnn_only2021.pth")
 
 
 plt.figure()
@@ -258,7 +272,7 @@ model.eval()
 all_preds = []
 all_labels = []
 
-all_dataloader = torch.utils.data.DataLoader(dataset, batch_size=16, shuffle=False)
+all_dataloader = torch.utils.data.DataLoader(dataset, batch_size=128, shuffle=False)
 
 with torch.no_grad():
     for batch in all_dataloader:
