@@ -35,7 +35,8 @@ from sklearn.metrics import classification_report, confusion_matrix, ConfusionMa
 import matplotlib.pyplot as plt
 
 from utility import plot_landcover, plot_data, class_mapping
-from convolutionalNN import LandCoverDataset, SimpleCNN  ,visualize_patch_split, predict_full_image, init_weights
+from convolutionalNN import LandCoverDataset, SimpleCNN  ,visualize_patch_split, predict_full_image
+from unet import UNet
 
 torch.manual_seed(13)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -118,6 +119,12 @@ plt.show()
 print(np.mean(stack_full, axis=(1,2)))
 print(np.std(stack_full, axis=(1,2)))
 
+label_array = stack_full[-1].ravel()
+
+classes, counts = np.unique(label_array, return_counts=True)
+print("Klassen:", classes)
+print("Anzahlen:", counts)
+
 #for normalization
 mean = np.nanmean(stack_full[:-1], axis=(1, 2))  # exclude label layer
 std = np.nanstd(stack_full[:-1], axis=(1, 2))
@@ -152,12 +159,22 @@ print(index_to_classname)
 
 input_stack = standardized_stack[0:-1,...]
 output_stack = indexed_label_band
-dataset = LandCoverDataset(input_stack, output_stack.astype(np.float32), patch_size=32)
+dataset = LandCoverDataset(input_stack, output_stack.astype(np.float32), patch_size=16)
 print(input_stack.shape)
 print(output_stack.shape)
 
 print(f"Input stack shape: {input_stack.shape}")
 print(f"Output stack (classes stack) shape: {output_stack.shape}")
+
+# Häufigkeiten normieren
+frequencies = counts / np.sum(counts)
+
+# Gewichtung berechnen (log stabilisiert)
+weights = 1.0 / (np.log(1.02 + frequencies))
+weights = weights / weights.sum()  # optional: Normierung auf Summe = 1
+weights_tensor = torch.tensor(weights, dtype=torch.float32).to('cuda')
+
+print("Gewichte:", weights_tensor)
 
 # Check dataset length (number of patches of patch_size * patch_size)
 len(dataset)
@@ -187,11 +204,13 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=4, shuffle = 
 
 visualize_patch_split(stack_full, train_dataset, test_dataset, patch_size=64)
 model = SimpleCNN(in_channels=input_stack.shape[0], num_classes=len(unique_classes)).to(device)  # Set num_classes appropriately
+print(len(unique_classes))
+#model = UNet(input_stack.shape[0],len(unique_classes)).to(device)
 print(model)
 
 
-criterion = nn.CrossEntropyLoss()              # For multi-class classification
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+criterion = torch.nn.CrossEntropyLoss(weight=weights_tensor)
+optimizer = optim.Adam(model.parameters(), lr=0.002)
 
 # Training loop
 num_epochs = 201
