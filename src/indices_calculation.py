@@ -35,7 +35,6 @@ print(S1_0823.data_vars)
 print(change_band.data_vars)
 print(change_band['Lava_Extent'])
 print(S2_0103['B2'])
-input()
 
     
 landcover = rxa.open_rasterio(file_path, masked=True).squeeze()
@@ -54,7 +53,7 @@ change_band = change_band.rio.reproject_match(landcover)
 
     
 # Single plot auxiliar function
-def plot_data(data, title="", colorbar=True, **kwargs):
+def plot_data(data, title="", colorbar=True, filename=None, **kwargs):
     """
     Plot some specific data
     """
@@ -68,7 +67,8 @@ def plot_data(data, title="", colorbar=True, **kwargs):
     if colorbar:
         plt.colorbar(img)
     plt.tight_layout()
-    plt.show()
+    plt.savefig(filename, dpi=300)
+    plt.close()
     
 
 
@@ -125,25 +125,25 @@ S1_0108_MPDI = EOIndices.radar.compute_MPDI(S1_0108_VH,S1_0108_VV)
 
 """Now you must plot each indice and make sure they look correct."""
 
-# # Plot each S1 indice, 0823
-# plot_data(data=S1_0823_VH_A, title="S1_0823_VH_A")
-# plot_data(data=S1_0823_VV_A, title="S1_0823_VV_A")
-# plot_data(data=S1_0823_ratio, title="S1_0823_ratio")
-# plot_data(data=S1_0823_VH_sigma_nought, title="S1_0823_VH_sigma_nought")
-# plot_data(data=S1_0823_VV_sigma_nought, title="S1_0823_VV_sigma_nought")
-# plot_data(data=S1_0823_RVI, title="S1_0823_RVI")
-# plot_data(data=S1_0823_RWI, title="S1_0823_RWI")
-# plot_data(data=S1_0823_MPDI, title="S1_0823_MPDI")
+# Plot each S1 indice, 0823
+plot_data(data=S1_0823_VH_A, title="S1_0823_VH_A", filename="../data/indices/S1_0823_VH_A.png")
+plot_data(data=S1_0823_VV_A, title="S1_0823_VV_A", filename="../data/indices/S1_0823_VV_A.png")
+plot_data(data=S1_0823_ratio, title="S1_0823_ratio", filename="../data/indices/S1_0823_ratio.png")
+plot_data(data=S1_0823_VH_sigma_nought, title="S1_0823_VH_sigma_nought", filename="../data/indices/S1_0823_VH_sigma_nought.png")
+plot_data(data=S1_0823_VV_sigma_nought, title="S1_0823_VV_sigma_nought", filename="../data/indices/S1_0823_VV_sigma_nought.png")
+plot_data(data=S1_0823_RVI, title="S1_0823_RVI",    filename="../data/indices/S1_0823_RVI.png")
+plot_data(data=S1_0823_RWI, title="S1_0823_RWI",   filename="../data/indices/S1_0823_RWI.png")
+plot_data(data=S1_0823_MPDI, title="S1_0823_MPDI", filename="../data/indices/S1_0823_MPDI.png")
 
-# # Plot each S1 indice, 0108
-# plot_data(data=S1_0108_VH_A, title="S1_0108_VH_A")
-# plot_data(data=S1_0108_VV_A, title="S1_0108_VV_A")
-# plot_data(data=S1_0108_ratio, title="S1_0108_ratio")
-# plot_data(data=S1_0108_VH_sigma_nought, title="S1_0108_VH_sigma_nought")
-# plot_data(data=S1_0108_VV_sigma_nought, title="S1_0108_VV_sigma_nought")
-# plot_data(data=S1_0108_RVI, title="S1_0108_RVI")
-# plot_data(data=S1_0108_RWI, title="S1_0108_RWI")
-# plot_data(data=S1_0108_MPDI, title="S1_0108_MPDI")
+# Plot each S1 indice, 0108
+plot_data(data=S1_0108_VH_A, title="S1_0108_VH_A",  filename="../data/indices/S1_0108_VH_A.png")
+plot_data(data=S1_0108_VV_A, title="S1_0108_VV_A", filename="../data/indices/S1_0108_VV_A.png")
+plot_data(data=S1_0108_ratio, title="S1_0108_ratio",    filename="../data/indices/S1_0108_ratio.png")
+plot_data(data=S1_0108_VH_sigma_nought, title="S1_0108_VH_sigma_nought",    filename="../data/indices/S1_0108_VH_sigma_nought.png")
+plot_data(data=S1_0108_VV_sigma_nought, title="S1_0108_VV_sigma_nought", filename="../data/indices/S1_0108_VV_sigma_nought.png")
+plot_data(data=S1_0108_RVI, title="S1_0108_RVI", filename="../data/indices/S1_0108_RVI.png")
+plot_data(data=S1_0108_RWI, title="S1_0108_RWI", filename="../data/indices/S1_0108_RWI.png")
+plot_data(data=S1_0108_MPDI, title="S1_0108_MPDI", filename="../data/indices/S1_0108_MPDI.png")
 
 
 # Sentinel 2 Indices
@@ -164,23 +164,23 @@ S2_0103_NBR = EOIndices.optical.NBR(S2_0103)
 S2_0103_NDSI_snow_green = EOIndices.optical.NDSI_snow_green_SWIR(S2_0103)
 #print(type(S2_0826_AWEI))
 
-# # Plot the indices
-# plot_data(data= S2_0826_NDVI, title="S2_0826_NDVI")
-# plot_data(data= S2_0826_NDWI, title="S2_0826_NDWI")
-# plot_data(data= S2_0826_AWEI, title="S2_0826_AWEI")
-# plot_data(data= S2_0826_NDBI, title="S2_0826_NDBI")
-# plot_data(data= S2_0826_NDSI_snow, title="S2_0826_NDSI_snow")
-# plot_data(data= S2_0826_NBR, title="S2_0826_NBR")
-# plot_data(data= S2_0826_NDSI_snow_green, title="S2_0826_NDSI_snow_green")
+# Plot the indices
+plot_data(data= S2_0826_NDVI, title="S2_0826_NDVI", filename="../data/indices/S2_0826_NDVI.png")
+plot_data(data= S2_0826_NDWI, title="S2_0826_NDWI", filename="../data/indices/S2_0826_NDWI.png")
+plot_data(data= S2_0826_AWEI, title="S2_0826_AWEI", filename="../data/indices/S2_0826_AWEI.png")
+plot_data(data= S2_0826_NDBI, title="S2_0826_NDBI", filename="../data/indices/S2_0826_NDBI.png")
+plot_data(data= S2_0826_NDSI_snow, title="S2_0826_NDSI_snow", filename="../data/indices/S2_0826_NDSI_snow.png")
+plot_data(data= S2_0826_NBR, title="S2_0826_NBR", filename="../data/indices/S2_0826_NBR.png")
+plot_data(data= S2_0826_NDSI_snow_green, title="S2_0826_NDSI_snow_green", filename="../data/indices/S2_0826_NDSI_snow_green.png")
 
-# # Plot the indices
-# plot_data(data= S2_0103_NDVI, title="S2_0103_NDVI")
-# plot_data(data= S2_0103_NDWI, title="S2_0103_NDWI")
-# plot_data(data= S2_0103_AWEI, title="S2_0103_AWEI")
-# plot_data(data= S2_0103_NDBI, title="S2_0103_NDBI")
-# plot_data(data= S2_0103_NDSI_snow, title="S2_0103_NDSI_snow")
-# plot_data(data= S2_0103_NBR, title="S2_0103_NBR")
-# plot_data(data= S2_0103_NDSI_snow_green, title="S2_0103_NDSI_snow_green")
+# Plot the indices
+plot_data(data= S2_0103_NDVI, title="S2_0103_NDVI", filename="../data/indices/S2_0103_NDVI.png")
+plot_data(data= S2_0103_NDWI, title="S2_0103_NDWI", filename="../data/indices/S2_0103_NDWI.png")
+plot_data(data= S2_0103_AWEI, title="S2_0103_AWEI",     filename="../data/indices/S2_0103_AWEI.png")
+plot_data(data= S2_0103_NDBI, title="S2_0103_NDBI", filename="../data/indices/S2_0103_NDBI.png")
+plot_data(data= S2_0103_NDSI_snow, title="S2_0103_NDSI_snow", filename="../data/indices/S2_0103_NDSI_snow.png")
+plot_data(data= S2_0103_NBR, title="S2_0103_NBR", filename="../data/indices/S2_0103_NBR.png")
+plot_data(data= S2_0103_NDSI_snow_green, title="S2_0103_NDSI_snow_green", filename="../data/indices/S2_0103_NDSI_snow_green.png")
 
 
 
@@ -391,7 +391,7 @@ bands_labels = ['Amplitude_VV_20210823', 'Amplitude_VV_20220108',
 Palma_datastack_msk = Palma_datastack.copy()
 Palma_datastack_msk[:, ~msk_total] = np.nan
 
-plot_data(Palma_datastack_msk[0,:,:], title="Plotting the first band of the datastack", colorbar=True)
+#plot_data(Palma_datastack_msk[0,:,:], title="Plotting the first band of the datastack", colorbar=True)
 
 filepath = folder + "Palma_datastack_change_detection.tif"
 print(f"Saved to {filepath}")

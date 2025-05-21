@@ -77,8 +77,8 @@ rgb = np.clip(rgb, 0, 1)
 plot_data(rgb)
 
 # Area to train
-dataset_data_subarea = dataset_data[:, 0:500, 000:680]
-plot_data(rgb[0:500, 000:680])
+dataset_data_subarea = dataset_data[:, 0:550, 000:1200]
+plot_data(rgb[0:550, 000:1200])
 
 
 # Band Selection for training
@@ -86,21 +86,21 @@ plot_data(rgb[0:500, 000:680])
 training_bands = [
      'Amplitude_VV_20210823',
      'Amplitude_VH_20210823',
-    # 'VH_VV_rate_20210823',
-    # 'Sigma_Nought_VH_20210823',
-    # 'RVI_20210823',
-    # 'RWI_20210823',
-    # 'MPDI_20210823',
+    'VH_VV_rate_20210823',
+    'Sigma_Nought_VH_20210823',
+    'RVI_20210823',
+    'RWI_20210823',
+    'MPDI_20210823',
     'S2_Red_20210826',
     'S2_Green_20210826',
     'S2_Blue_20210826',
-    # 'NDVI_20210826',
-    # 'NDWI_20210826',
-    # 'AWEI_20210826',
-    # 'AWEI_20220x103',
-    # 'NDBI_20210826',
-    # 'NBR_20210826',
-    # 'NDSI_20210826',
+    'NDVI_20210826',
+    'NDWI_20210826',
+    'AWEI_20210826',
+    'AWEI_20220103',
+    'NDBI_20210826',
+    'NBR_20210826',
+    'NDSI_20210826',
     'Land_Cover'
 ]
 
@@ -172,7 +172,7 @@ frequencies = counts / np.sum(counts)
 # Gewichtung berechnen (log stabilisiert)
 weights = 1.0 / (np.log(1.02 + frequencies))
 weights = weights / weights.sum()  # optional: Normierung auf Summe = 1
-weights_tensor = torch.tensor(weights, dtype=torch.float32).to('cuda')
+weights_tensor = torch.tensor(weights, dtype=torch.float32).to(device)
 
 print("Gewichte:", weights_tensor)
 
@@ -199,25 +199,27 @@ train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 # Create DataLoaders
 # Note the parameter shuffle=True for the Training dataloader --> Each epoch the
 #   training patches will be loaded in a different order
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=4, shuffle = False)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16, shuffle=True)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=16, shuffle = False)
 
-visualize_patch_split(stack_full, train_dataset, test_dataset, patch_size=64)
+visualize_patch_split(stack_full, train_dataset, test_dataset, patch_size=16)
 model = SimpleCNN(in_channels=input_stack.shape[0], num_classes=len(unique_classes)).to(device)  # Set num_classes appropriately
+#model = UNet(input_stack.shape[0], len(unique_classes)).to(device)  # Set num_classes appropriately
 print(len(unique_classes))
 #model = UNet(input_stack.shape[0],len(unique_classes)).to(device)
 print(model)
 
 
 criterion = torch.nn.CrossEntropyLoss(weight=weights_tensor)
-optimizer = optim.Adam(model.parameters(), lr=0.002)
+optimizer = optim.Adam(model.parameters(), lr=0.0005)
 
 # Training loop
-num_epochs = 201
+num_epochs = 51
 
 train_losses = []
 test_losses = []
 test_accuracies = []
+best_accuracy = 0
 
 for epoch in range(num_epochs):
     model.train()
@@ -244,6 +246,7 @@ for epoch in range(num_epochs):
     total_pixels = 0
     correct_pixels = 0
     running_loss = 0.0
+    best_accuracy = 0.0 
 
     with torch.no_grad():
         for batch in test_loader:
@@ -264,9 +267,13 @@ for epoch in range(num_epochs):
     test_accuracies.append(accuracy)
     if (epoch % 10) == 0:
       print(f"Epoch {epoch+1}/{num_epochs} - Train Loss: {train_losses[-1]:.4f} - Test Pixel Accuracy: {accuracy:.4f}")
+    if accuracy > best_accuracy:
+        best_accuracy = accuracy
+        current_best_model = model.state_dict().copy()
+        
 
 # Optional: Save the trained model
-torch.save(model.state_dict(), "../models/land_cover_cnn_only2021.pth")
+torch.save(current_best_model, f"../models/land_cover_cnn_{best_accuracy:.2f}.pth")
 
 
 plt.figure()

@@ -63,20 +63,26 @@ class LandCoverDataset(Dataset):
             sample = self.transform(sample)
 
         return sample
-    
+
 # Define a simple CNN model for pixel-wise classification
 class SimpleCNN(nn.Module):
     def __init__(self, in_channels, num_classes):
         super(SimpleCNN, self).__init__()
         
         self.encoder = nn.Sequential(
-            nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels, 32, kernel_size=5, padding=2),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.Dropout(p=0.1),
+            nn.Conv2d(32, 64, kernel_size=5, padding=2),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.Dropout(p=0.1),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
         )
+        
         self.classifier = nn.Conv2d(64, num_classes, kernel_size=1)  # 1x1 conv for pixel-wise classification
         self.apply(init_weights)
         

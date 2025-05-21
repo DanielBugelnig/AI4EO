@@ -15,7 +15,7 @@ matplotlib.use('TkAgg')
 import xarray as xr
 import rioxarray as rxa
 
-LOOKAT_S1 = False
+LOOKAT_S1 = True
 LOOKAT_S2 = False
 LOOKAT_TIF = True
 
@@ -185,7 +185,7 @@ if LOOKAT_TIF:
     file_path ="../data/Land_Cover_Palma1.tif"
     with rasterio.open(file_path) as src:
         land_cover_data = src.read(1)
-        plot_data(land_cover_data, cmap="jet")
+        plot_data(land_cover_data, cmap="viridis", title="Land Cover Data")
         print(land_cover_data.shape)
         plt.imsave("../data/rgb/cover_rgb.png", land_cover_data)
 
