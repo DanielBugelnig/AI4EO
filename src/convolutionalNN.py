@@ -1,3 +1,12 @@
+'''
+Author  : Daniel Bugelnig
+Email   : daniel.j.bugelnig@gmail.com
+Date    : 2025-06-06
+Purpose : script for architectural design and training of a convolutional neural network for land cover classification
+'''
+
+
+
 # PyTorch DL
 import torch
 import torch.nn as nn
@@ -122,10 +131,14 @@ def visualize_patch_split(full_stack, train_subset, test_subset, patch_size):
     plt.tight_layout()
     plt.show()
     
-def predict_full_image(model, full_stack, patch_size, device, mean, std):
+def predict_full_image(model, full_stack, patch_size, device, mean, std, inference=False):
     model.eval()
     H, W = full_stack.shape[1:]
-    n_classes = model(torch.randn(1, full_stack.shape[0] - 1, patch_size, patch_size).to(device)).shape[1]
+    if inference:
+        endindex = 0
+    else:       
+        endindex = 1
+    n_classes = model(torch.randn(1, full_stack.shape[0] - endindex, patch_size, patch_size).to(device)).shape[1]
 
     # Prepare output map and validity mask
     prediction_map = np.full((H, W), fill_value=np.nan)
@@ -133,7 +146,10 @@ def predict_full_image(model, full_stack, patch_size, device, mean, std):
 
     for i in range(0, H - patch_size + 1, patch_size):
         for j in range(0, W - patch_size + 1, patch_size):
-            patch = full_stack[:-1, i:i+patch_size, j:j+patch_size]
+            if inference:
+                patch = full_stack[:, i:i+patch_size, j:j+patch_size]
+            else:    
+                patch = full_stack[:-1, i:i+patch_size, j:j+patch_size]
 
             if np.isnan(patch).any():
                 continue  # skip patches with NaNs

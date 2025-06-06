@@ -1,0 +1,98 @@
+Input stack shape: (16, 550, 1200)
+Output stack (classes stack) shape: (550, 1200)
+Gewichte: tensor([0.2469, 0.0175, 0.0485, 0.0208, 0.2624, 0.0780, 0.0785, 0.2206, 0.0267])
+Image shape: torch.Size([16, 16, 16])
+Label shape: torch.Size([16, 16])
+9
+Unique classes: [ 0. 10. 20. 30. 40. 50. 60. 80. nan]
+UNet(
+  (conv1): Conv2d(16, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (maxPool1): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv3): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv4): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (maxPool2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv5): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv6): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (maxPool3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv7): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv8): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (maxPool4): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv9): Conv2d(512, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv10): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (drop): Dropout(p=0.5, inplace=False)
+  (upconv1): ConvTranspose2d(1024, 512, kernel_size=(2, 2), stride=(2, 2))
+  (conv1b): Conv2d(1024, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv2b): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (upconv2): ConvTranspose2d(512, 256, kernel_size=(2, 2), stride=(2, 2))
+  (conv3b): Conv2d(512, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv4b): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (upconv3): ConvTranspose2d(256, 128, kernel_size=(2, 2), stride=(2, 2))
+  (conv5b): Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv6b): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (upconv4): ConvTranspose2d(128, 64, kernel_size=(2, 2), stride=(2, 2))
+  (conv7b): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv8b): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (final_conv): Conv2d(64, 9, kernel_size=(1, 1), stride=(1, 1))
+)
+Epoch 1/51 - Train Loss: 1.2328 - Test Pixel Accuracy: 0.6057
+Epoch 11/51 - Train Loss: 0.6985 - Test Pixel Accuracy: 0.6772
+Epoch 21/51 - Train Loss: 0.6298 - Test Pixel Accuracy: 0.7027
+Epoch 31/51 - Train Loss: 0.5692 - Test Pixel Accuracy: 0.7312
+Epoch 41/51 - Train Loss: 0.4910 - Test Pixel Accuracy: 0.7177
+Epoch 51/51 - Train Loss: 0.3318 - Test Pixel Accuracy: 0.7339
+Classification Report:
+                        precision    recall  f1-score   support
+
+           Not Defined      0.595     0.762     0.668      1056
+            Tree cover      0.930     0.866     0.897    213163
+             Shrubland      0.731     0.878     0.798     62210
+             Grassland      0.875     0.766     0.816    175946
+              Cropland      0.814     0.320     0.459       219
+              Built-up      0.533     0.855     0.657     32519
+Bare/sparse vegetation      0.811     0.918     0.861     31761
+Permanent water bodies      0.754     0.891     0.817       758
+
+              accuracy                          0.835    517632
+             macro avg      0.755     0.782     0.747    517632
+          weighted avg      0.854     0.835     0.839    517632
+
+
+
+    SimpleCNN(
+    (encoder): Sequential(
+        (0): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+        (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU()
+        (3): Dropout(p=0.1, inplace=False)
+        (4): Conv2d(32, 64, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+        (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (6): ReLU()
+        (7): Dropout(p=0.1, inplace=False)
+        (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (9): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (10): ReLU()
+    )
+    (classifier): Conv2d(64, 9, kernel_size=(1, 1), stride=(1, 1))
+    )
+Epoch 1/51 - Train Loss: 1.4023 - Test Pixel Accuracy: 0.6520
+Epoch 11/51 - Train Loss: 0.7503 - Test Pixel Accuracy: 0.6958
+Epoch 21/51 - Train Loss: 0.6958 - Test Pixel Accuracy: 0.7208
+Epoch 31/51 - Train Loss: 0.6621 - Test Pixel Accuracy: 0.7191
+Epoch 41/51 - Train Loss: 0.6470 - Test Pixel Accuracy: 0.6901
+Epoch 51/51 - Train Loss: 0.6320 - Test Pixel Accuracy: 0.7144
+Classification Report:
+                        precision    recall  f1-score   support
+
+           Not Defined      0.149     0.825     0.253      1056
+            Tree cover      0.924     0.796     0.855    213163
+             Shrubland      0.562     0.784     0.654     62210
+             Grassland      0.794     0.624     0.699    175946
+              Cropland      0.445     0.352     0.393       219
+              Built-up      0.415     0.815     0.550     32519
+Bare/sparse vegetation      0.733     0.878     0.799     31761
+Permanent water bodies      0.676     0.918     0.779       758
+
+              accuracy                          0.742    517632
+             macro avg      0.587     0.749     0.623    517632
+          weighted avg      0.790     0.742     0.754    517632

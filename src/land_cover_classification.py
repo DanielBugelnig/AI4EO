@@ -77,7 +77,9 @@ rgb = np.clip(rgb, 0, 1)
 plot_data(rgb)
 
 # Area to train
-dataset_data_subarea = dataset_data[:, 0:550, 000:1200]
+#dataset_data_subarea = dataset_data[:, 0:550, 000:1200]
+dataset_data_subarea = dataset_data
+
 plot_data(rgb[0:550, 000:1200])
 
 
@@ -97,7 +99,6 @@ training_bands = [
     'NDVI_20210826',
     'NDWI_20210826',
     'AWEI_20210826',
-    'AWEI_20220103',
     'NDBI_20210826',
     'NBR_20210826',
     'NDSI_20210826',
@@ -206,6 +207,7 @@ visualize_patch_split(stack_full, train_dataset, test_dataset, patch_size=16)
 model = SimpleCNN(in_channels=input_stack.shape[0], num_classes=len(unique_classes)).to(device)  # Set num_classes appropriately
 #model = UNet(input_stack.shape[0], len(unique_classes)).to(device)  # Set num_classes appropriately
 print(len(unique_classes))
+print("Unique classes:", unique_classes)
 #model = UNet(input_stack.shape[0],len(unique_classes)).to(device)
 print(model)
 
@@ -273,7 +275,7 @@ for epoch in range(num_epochs):
         
 
 # Optional: Save the trained model
-torch.save(current_best_model, f"../models/land_cover_cnn_{best_accuracy:.2f}.pth")
+torch.save(current_best_model, f"../models/land_cover_cnn_whole_simple_correct{best_accuracy:.2f}.pth")
 
 
 plt.figure()
