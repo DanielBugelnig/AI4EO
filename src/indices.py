@@ -12,6 +12,7 @@ import xarray as xr
 from xarray.core.dataarray import DataArray
 from xarray.core.dataset import Dataset
 import rioxarray as rxa
+from scipy.ndimage import uniform_filter
 import math
 
 
@@ -19,11 +20,63 @@ class RadarIndices():
     
     @staticmethod
     def _checking_input(data):
+        """
+        Validates that the input is an xarray.DataArray.
+
+        Parameters:
+        data: Input to check.
+
+        Raises:
+        Exception: If input is not of type DataArray.
+        """
         if not (isinstance(data, DataArray)):
             raise Exception(f"Wrong datatype. Expected {DataArray}, not {type(data)}")
         
+    
+    @staticmethod
+    def filtering_band(band: DataArray, size: int = 5) -> DataArray:
+        """
+        Applies a Lee filter to reduce speckle noise in a SAR band (e.g., VV or VH).
+
+        Parameters:
+        band (DataArray): The input radar band in linear scale.
+        size (int): Size of the moving window used for filtering.
+
+        Returns:
+        DataArray: The filtered band as a new DataArray.
+        """
+        RadarIndices._checking_input(band)
+        
+        # convert to numpy array
+        band_np = band.values.astype(np.float32)
+        band_np = np.nan_to_num(band_np, nan=np.nanmedian(band_np)) 
+        overall_variance = np.var(band_np)
+
+        # Lee-Filter 
+        mean = uniform_filter(band_np, size=size)
+        mean_sq = uniform_filter(band_np ** 2, size=size)
+        variance = mean_sq - mean**2
+        overall_variance = np.var(band_np)
+        
+        coef = variance / (variance + overall_variance + 1e-8) 
+        lee_filtered = mean + coef * (band_np - mean)
+        
+        return DataArray(lee_filtered, coords=band.coords, dims=band.dims, name=f"{band.name}_filtered")
+        
+    
+   
+        
     @staticmethod
     def extract_VV_VH(data):
+        """
+        Extracts the VV and VH amplitude bands from an xarray.Dataset.
+
+        Parameters:
+        data (Dataset): Dataset containing 'Amplitude_VV' and 'Amplitude_VH'.
+
+        Returns:
+        tuple: VH and VV bands as DataArrays.
+        """
         if not (isinstance(data, Dataset)):
             raise Exception(f"Wrong datatype. Expected {Dataset}, not {type(data)}")
         VH = data['Amplitude_VH']
@@ -32,6 +85,15 @@ class RadarIndices():
     
     @staticmethod
     def compute_A(data):
+        """
+        Computes the amplitude A = sqrt(DN) and returns both A and DN.
+
+        Parameters:
+        data (DataArray): Input radar band data.
+
+        Returns:
+        tuple: Amplitude and original DN as numpy arrays.
+        """
         RadarIndices._checking_input(data)
         # compute Amplitude for each pixel
         DN = np.array(data)
@@ -39,18 +101,46 @@ class RadarIndices():
     
     @staticmethod
     def compute_sigma_nought_lin(data):
+        """
+        Computes sigma nought (σ⁰) in linear scale from amplitude data.
+
+        Parameters:
+        data (DataArray): Input radar band data.
+
+        Returns:
+        DataArray: σ⁰ in linear scale.
+        """
         RadarIndices._checking_input(data)
         A, DN = RadarIndices.compute_A(data)
         return np.pow(DN,2) / A
     
     @staticmethod
     def compute_sigma_nought_log(data):
+        """
+        Computes sigma nought (σ⁰) in dB scale from amplitude data.
+
+        Parameters:
+        data (DataArray): Input radar band data.
+
+        Returns:
+        DataArray: σ⁰ in logarithmic (dB) scale.
+        """
         RadarIndices._checking_input(data)
         A, DN = RadarIndices.compute_A(data)
         return 10 * np.log10(np.pow(DN,2)) - A
 
     @staticmethod
     def compute_VH_VV_ratio(VH, VV):
+        """
+        Computes the ratio of σ⁰(VH) to σ⁰(VV) in linear scale.
+
+        Parameters:
+        VH (DataArray): VH band.
+        VV (DataArray): VV band.
+
+        Returns:
+        DataArray: The σ⁰(VH) / σ⁰(VV) ratio.
+        """
         RadarIndices._checking_input(VH)
         RadarIndices._checking_input(VV)
         return RadarIndices.compute_sigma_nought_lin(VH) / RadarIndices.compute_sigma_nought_lin(VV)

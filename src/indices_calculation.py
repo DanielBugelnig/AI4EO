@@ -88,9 +88,24 @@ def plot_data(data, title="", colorbar=True, filename=None, **kwargs):
 # Sentinel-1 Indices
 print(S1_0823.data_vars)
 print(S2_0826.data_vars)
+
 S1_0823_VH, S1_0823_VV = EOIndices.radar.extract_VV_VH(S1_0823)
 S1_0108_VH, S1_0108_VV = EOIndices.radar.extract_VV_VH(S1_0108)
 
+plot_data(data=S1_0823_VH, title="S1_0823_VH", filename="../data/indices/S1_0823_VH.png")
+plot_data(data=S1_0823_VV, title="S1_0823_VV", filename="../data/indices/S1_0823_VV.png")
+plot_data(data=S1_0108_VH, title="S1_0108_VH", filename="../data/indices/S1_0108_VH.png")
+plot_data(data=S1_0108_VV, title="S1_0108_VV", filename="../data/indices/S1_0108_VV.png")
+
+S1_0823_VH = EOIndices.radar.filtering_band(S1_0823_VH, 5)
+S1_0823_VV = EOIndices.radar.filtering_band(S1_0823_VV, 5)
+S1_0108_VH = EOIndices.radar.filtering_band(S1_0108_VH, 5)
+S1_0108_VV = EOIndices.radar.filtering_band(S1_0108_VV, 5)
+# Plot the filtered data
+plot_data(data=S1_0823_VH, title="S1_0823_VH_filtered", filename="../data/indices/S1_0823_VH_filtered.png")
+plot_data(data=S1_0823_VV, title="S1_0823_VV_filtered", filename="../data/indices/S1_0823_VV_filtered.png")
+plot_data(data=S1_0108_VH, title="S1_0108_VH_filtered", filename="../data/indices/S1_0108_VH_filtered.png")
+plot_data(data=S1_0108_VV, title="S1_0108_VV_filtered", filename="../data/indices/S1_0108_VV_filtered.png")
 
 # Amplitude
 S1_0823_VH_A,_ = EOIndices.radar.compute_A(S1_0823_VH)
@@ -325,7 +340,7 @@ print(S2_0826)
 print(land_cover_data.shape)
 
 # Plot of the aligned LC
-plot_data(landcover_aligned.isel(band=0).values, title="alignedLC", colorbar=True)
+#plot_data(landcover_aligned.isel(band=0).values, title="alignedLC", colorbar=True)
 
 """## 4. Generating and saving the data stack
 
