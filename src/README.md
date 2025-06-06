@@ -42,6 +42,9 @@ Calculates various indices for Sentinel-1 and Sentinel-2 datasets:
 
 ---
 
+## 3.1 `create_doc_comp.py`, `create_doc_imgs.py`
+Files for automating saving images for documentation
+
 ## 4. `data_preparation.py`
 Prepares and explores the datasets:
 
@@ -53,13 +56,12 @@ Prepares and explores the datasets:
 
 ---
 
-## 5. `change_detection.py`
+## 5. `roject_of_Laboratory_4_Change_Detection.ipynb`
 Detects changes due to the La Palma volcano eruption:
 
 - Loads the preprocessed data stack (`Palma_datastack_change_detection.tif`).
-- Extracts and visualizes the `"Change_Band"` layer.
 
-**Purpose**: Performs change detection analysis using preprocessed data. --> needs to be done
+**Purpose**: Performs change detection analysis using preprocessed data.
 
 ---
 
@@ -88,8 +90,11 @@ Trains a CNN for land cover classification:
 **Purpose**: Trains and evaluates a CNN model for land cover classification.
 
 ---
+## 8. `inference_land_cover.py`  
+  Script for running inference using a trained land cover classification model on new data.
 
-## 🧾 Summary
+
+## Summary
 
 The `src/` folder includes scripts for:
 
@@ -106,6 +111,6 @@ The `src/` folder includes scripts for:
   `change_detection.py` – Land cover change analysis
 
 - **Land Cover Classification**:  
-  `convolutionalNN.py`, `land_cover_classification.py` – CNN-based classification
+  `convolutionalNN.py`, `land_cover_classification.py`, `inference_land_cover.py` – CNN-based classification
 
-**End-to-End Goal**: Enable complete processing, analysis, and visualization of remote sensing data for the La Palma volcano eruption case study.
+Enable complete processing, analysis, and visualization of remote sensing data for the La Palma volcano eruption case study.

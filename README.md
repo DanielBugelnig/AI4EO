@@ -43,37 +43,18 @@ project_root/
 
 As per the project requirements, this repository includes:
 
-- ✅ **Dataset** – All required satellite data, preprocessed and organized (see `data/` and `dataset_link.txt`)
-- ✅ **Codebase** – Scripts and a main Colab notebook for end-to-end processing and analysis
-- ✅ **Report** – A concise summary of our methodology, results, and conclusions (`doc/report.pdf`)
+- **Dataset**:All required satellite data, preprocessed and organized (see `Palma_datastack_change_detection.tif` and `Palma_datastack_final.tif`)
+- **Codebase**: This repository: `https://github.com/DanielBugelnig/AI4EO.git`
+-  **Report**:(`report.pdf`)
 
 
-## Project Timeline
-
-- **Deadline:** Second week of June (exact date on Atenea)
-- **Optional Pre-evaluation:** Early dataset submission for instructor review
-
-## Required Dataset Bands
-
-Each group must include the following data:
-
-- **2 Sentinel-1 GRD** acquisitions
-- **2 Sentinel-2 L2A** acquisitions (<5% cloud cover)
-- **1 Land Cover** layer
-
-Our dataset satisfies these requirements and includes additional bands and metadata to improve analysis.
 
 ## Usage
 
 1. Clone the repository
 2. Create a virtual environment (python3.10) install all requirements (requirements.txt)
 3. Open `AI4EO_Project.ipynb` in [Google Colab](https://colab.research.google.com/)
-4. Follow the cells step by step to:
-   - Load and visualize data
-   - Compute indices
-   - Run classification and change detection
-   - Export results and visualizations
-
+4. Read the readme in the `/src` for explanations
 ---
 
 **2025 – AI4EO Project – Remote Sensing and Earth Observation, Mirea Lopez, Daniel Bugelnig**

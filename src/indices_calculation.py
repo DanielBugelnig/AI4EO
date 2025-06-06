@@ -10,7 +10,7 @@ import rasterio
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('TkAgg')  # oder 'Qt5Agg', wenn du Qt installiert hast
+matplotlib.use('TkAgg') 
 import xarray as xr
 import rioxarray as rxa
 
