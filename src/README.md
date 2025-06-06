@@ -1,4 +1,5 @@
-# 📁 Source files overview
+#
+Source files overview
 
 ## 1. `utility.py`
 This file contains utility functions for data preparation and visualization:
