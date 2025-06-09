@@ -33,7 +33,7 @@ This repository includes:
 
 - **Dataset**:All required satellite data, preprocessed and organized (see `Palma_datastack_change_detection.tif` and `Palma_datastack_final.tif`)
 - **Codebase**: This repository: `https://github.com/DanielBugelnig/AI4EO.git`
--  **Report**:(`report.pdf`)
+-  **Report**:(`AI4EO_compressed.pdf`)
 
 
 
